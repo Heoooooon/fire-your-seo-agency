@@ -128,6 +128,13 @@ class Fixture:
     def __init__(self, root: Path) -> None:
         self.root = root
         self.write("SKILL.md", SKILL_TEMPLATE.format(name=SKILL_NAME, description="A demo skill for tests."))
+        self.write(validate.OMO_SKILL_PATH, SKILL_TEMPLATE.format(name=SKILL_NAME, description="A demo OmO skill."))
+        self.write_json("package.json", {
+            "name": SKILL_NAME,
+            "version": "1.2.0",
+            "license": "MIT",
+            "pi": {"skills": ["skills/fire-your-seo-agency"]},
+        })
         self.write_json(".claude-plugin/plugin.json", plugin_manifest())
         self.write_json(".claude-plugin/marketplace.json", marketplace_manifest())
         self.write("LICENSE", "MIT License\n\nCopyright (c) 2026 tester\n")
@@ -344,6 +351,64 @@ class TestManifests(ValidatorTestCase):
         self.assertFails("manifest.marketplace")
 
 
+class TestOmoPackage(ValidatorTestCase):
+    def test_missing_registered_skill_fails(self) -> None:
+        self.fixture.remove(validate.OMO_SKILL_PATH)
+        self.assertFails("skill.omo.frontmatter")
+
+    def test_registered_skill_frontmatter_is_validated(self) -> None:
+        self.fixture.write(validate.OMO_SKILL_PATH, "# No frontmatter\n")
+        self.assertFails("skill.omo.frontmatter")
+
+    def test_missing_package_manifest_fails(self) -> None:
+        self.fixture.remove("package.json")
+        self.assertFails("manifest.package")
+
+    def test_invalid_package_json_fails(self) -> None:
+        self.fixture.write("package.json", "{broken")
+        self.assertFails("manifest.package")
+
+    def test_non_object_package_json_fails(self) -> None:
+        self.fixture.write("package.json", "[]")
+        self.assertFails("manifest.package")
+
+    def test_wrong_skill_registration_fails(self) -> None:
+        for pi in (None, [], {"skills": ["SKILL.md"]}, {"skills": ["../outside"]}):
+            with self.subTest(pi=pi):
+                data = self.fixture.read_json("package.json")
+                data["pi"] = pi
+                self.fixture.write_json("package.json", data)
+                self.assertFails("manifest.package")
+
+    def test_name_version_and_license_must_agree(self) -> None:
+        for key, value in (("name", "other-skill"), ("version", "1.1.0"), ("license", "Apache-2.0")):
+            with self.subTest(key=key):
+                data = self.fixture.read_json("package.json")
+                original = data[key]
+                data[key] = value
+                self.fixture.write_json("package.json", data)
+                self.assertFails("manifest.package")
+                data[key] = original
+                self.fixture.write_json("package.json", data)
+        self.assertClean()
+
+    def test_non_semver_package_version_fails(self) -> None:
+        data = self.fixture.read_json("package.json")
+        data["version"] = "latest"
+        self.fixture.write_json("package.json", data)
+        self.assertFails("manifest.package")
+
+    def test_references_resolve_from_the_omo_skill_directory(self) -> None:
+        skill = SKILL_TEMPLATE.format(name=SKILL_NAME, description="A demo OmO skill.")
+        self.fixture.write(validate.OMO_SKILL_PATH, skill + "\n[SEO](../../references/seo.md)\n")
+        self.assertClean()
+
+    def test_broken_skill_relative_reference_fails(self) -> None:
+        skill = SKILL_TEMPLATE.format(name=SKILL_NAME, description="A demo OmO skill.")
+        self.fixture.write(validate.OMO_SKILL_PATH, skill + "\n[SEO](references/seo.md)\n")
+        self.assertFails("docs.links")
+
+
 class TestLinks(ValidatorTestCase):
     def test_broken_relative_link(self) -> None:
         self.fixture.write("README.md", README_EN + "\n[missing](./nope.md)\n")
@@ -495,6 +560,10 @@ class TestSecrets(ValidatorTestCase):
         self.fixture.write("notes.md", "token ghp_" + "a" * 40 + "\n")
         self.assertFails("security.secrets")
 
+    def test_package_scripts_are_scanned_for_secrets(self) -> None:
+        self.fixture.write("scripts/demo.mjs", "const token = 'ghp_" + "a" * 40 + "';\n")
+        self.assertFails("security.secrets")
+
     def test_private_key_block_is_detected(self) -> None:
         self.fixture.write("notes.md", "-----BEGIN " + "RSA PRIVATE KEY-----\n")
         self.assertFails("security.secrets")
@@ -575,8 +644,10 @@ class TestRobustness(ValidatorTestCase):
 class RealRepositoryTestCase(unittest.TestCase):
     EXPECTED_CHECKS = (
         "skill.frontmatter",
+        "skill.omo.frontmatter",
         "manifest.plugin",
         "manifest.marketplace",
+        "manifest.package",
         "docs.references",
         "docs.links",
         "docs.readme",

@@ -5,6 +5,14 @@ Notable changes per release. Versions match the plugin tags
 `.claude-plugin/marketplace.json` must carry the same version, and
 `tools/validate.py` fails the build when they drift apart.
 
+## Unreleased
+
+- OmO/Senpi git package manifest with `pi.skills`, Korean-first skill entry point,
+  clinic/app usage examples and a real Senpi loader check.
+- Package/frontmatter validation and regression tests alongside the existing
+  Python checks. Root Claude skill, plugin manifests and shared references retained.
+- Fork installation instructions and explicit credit to leopard627 in both READMEs.
+
 ## 1.2.1 — 2026-09-25
 
 Repository checks and CI (contributed by @twoimo in #2), plus one content-ops fix.

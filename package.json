@@ -1,0 +1,21 @@
+{
+  "name": "fire-your-seo-agency",
+  "version": "1.2.1",
+  "description": "한국어 우선 SEO·AEO·GEO·LLMO·NEO(네이버) 진단·구현·측정 스킬 for OmO/Senpi.",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Heoooooon/fire-your-seo-agency.git"
+  },
+  "license": "MIT",
+  "author": "leopard627",
+  "keywords": ["omo", "omo-plugin", "skill", "seo", "aeo", "geo", "llmo", "naver"],
+  "scripts": {
+    "test": "python3 -m unittest discover -s tests -t . -v",
+    "validate": "python3 tools/validate.py --strict",
+    "verify": "node scripts/verify.mjs"
+  },
+  "pi": {
+    "skills": ["skills/fire-your-seo-agency"]
+  }
+}

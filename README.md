@@ -16,8 +16,10 @@ A wave of services now charges monthly retainers for "AI-era search optimization
 **public standards and repeatable checklists**. When a human does it, it's a retainer.
 When your agent does it, it's a skill.
 
-This repository is a [Claude Code](https://claude.com/claude-code) skill. Install it and
-your agent audits your site, fixes what's broken, and measures the results.
+This fork packages [leopard627's original MIT skill](https://github.com/leopard627/fire-your-seo-agency)
+for **OmO/Senpi**, while retaining the [Claude Code](https://claude.com/claude-code)
+entry point. The audit playbook and references are credited to leopard627; this fork
+adds the package manifest, Korean-first OmO entry point and package validation.
 
 ## Built on real numbers
 
@@ -53,10 +55,38 @@ and cited", not "posts published".
 
 ## Install
 
-As a plugin (recommended — one command, easy updates):
+### OmO / Senpi
+
+Add this entry to the existing `packages` array in `~/.omo/agent/settings.json`.
+The PR is not merged, so use its branch:
+
+```json
+"packages": ["git:github.com/Heoooooon/fire-your-seo-agency@omo-package"]
+```
+
+After a future merge, the default-branch entry is
+`git:github.com/Heoooooon/fire-your-seo-agency`. Start a new session or `/reload`.
+This package registers only `skills/fire-your-seo-agency` through `pi.skills`.
+It has no npm dependencies or install hooks and does not change your settings itself.
+
+Ask naturally, for example:
+
+```text
+이 병원 홈페이지 SEO와 네이버 서치어드바이저·플레이스·AI 브리핑 노출을 진단해줘.
+이 앱 랜딩의 검색 노출과 ChatGPT 인용 가능성을 점검하고 llms.txt 개선안을 만들어줘.
+```
+
+See [우리 사이트에 쓰는 법](./skills/fire-your-seo-agency/SKILL.md#우리-사이트에-쓰는-법)
+for generic clinic and app examples. Audit-only requests remain read-only; local
+implementation and external submissions follow the scope the user authorized.
+
+### Claude Code (existing installation)
+
+The original root `SKILL.md`, `references/` and `.claude-plugin/` remain in place.
+For this fork as a plugin:
 
 ```
-/plugin marketplace add leopard627/fire-your-seo-agency
+/plugin marketplace add Heoooooon/fire-your-seo-agency
 /plugin install fire-your-seo-agency@fire-your-seo-agency
 ```
 
@@ -64,10 +94,10 @@ Or via git clone:
 
 ```bash
 # As a project skill (this project only)
-git clone https://github.com/leopard627/fire-your-seo-agency.git .claude/skills/fire-your-seo-agency
+git clone https://github.com/Heoooooon/fire-your-seo-agency.git .claude/skills/fire-your-seo-agency
 
 # Or as a personal skill (every project)
-git clone https://github.com/leopard627/fire-your-seo-agency.git ~/.claude/skills/fire-your-seo-agency
+git clone https://github.com/Heoooooon/fire-your-seo-agency.git ~/.claude/skills/fire-your-seo-agency
 ```
 
 Then in Claude Code:
@@ -111,6 +141,10 @@ Become the primary source for a number, and the citations follow.
 ## Structure
 
 ```
+package.json          ← OmO package manifest (pi.skills)
+skills/fire-your-seo-agency/
+  SKILL.md            ← Korean-first OmO/Senpi entry point
+scripts/verify.mjs    ← actual Senpi loader check (no settings writes)
 SKILL.md              ← agent operating procedure (audit → implement → measure)
 references/
   seo.md              ← technical SEO checklist + real-world traps
@@ -129,22 +163,30 @@ tests/                ← unit tests for the checks
 
 > The Korean documents under `references/` are canonical (the agent reads those);
 > `references/en/` mirrors them in English for human readers.
+> The OmO entry point resolves shared references as `../../references/` from its
+> own directory; references were not moved, preserving Claude clone install paths.
 
 ## Repository checks
 
-This repo checks itself — `.github/workflows/validate.yml` runs all of it on every push
-and pull request:
+This repo checks itself — `.github/workflows/validate.yml` runs the Python checks on
+every push and pull request. The Senpi loader check is local and needs Senpi installed:
 
 ```bash
-python3 tools/validate.py --strict          # 10 checks, standard library only
+python3 tools/validate.py --strict          # 12 checks, standard library only
 python3 -m unittest discover -s tests -t .  # unit tests for every check
 python3 -m pip install pillow
 python3 tools/optimize_assets.py --check    # flags recompressible assets
+node scripts/verify.mjs                    # needs a locally installed Senpi
 ```
+
+Package aliases: `npm test`, `npm run validate`, `npm run verify` (or `bun run`).
+The loader check defaults to `~/.bun/install/global/node_modules/@code-yeongyu/senpi`;
+set `SENPI_ROOT` to another Senpi installation directory if needed.
 
 `tools/validate.py` enforces the things that rot silently in a docs-only repo: the
 `SKILL.md` frontmatter contract (kebab-case name, 64-character name limit, 1024-character
 single-line description), `plugin.json` ↔ `marketplace.json` version and name agreement,
+the OmO skill frontmatter and `package.json` registration/version/license agreement,
 `CHANGELOG.md` matching the manifest version, relative links and anchors, Korean/English
 reference parity (heading counts, table rows, checkboxes, section numbering), the asset
 budget and preview dimensions, the MIT license metadata, and a secret scan over every
@@ -162,4 +204,7 @@ text file.
 
 ## License
 
-MIT — use it freely, and keep the retainer money.
+MIT. Original skill, audit methodology and reference documents by
+[leopard627](https://github.com/leopard627/fire-your-seo-agency).
+The original `Copyright (c) 2026 leopard627` notice is preserved in [LICENSE](./LICENSE).
+OmO/Senpi packaging is maintained in [this fork](https://github.com/Heoooooon/fire-your-seo-agency).
