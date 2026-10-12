@@ -15,8 +15,10 @@
 대행 서비스가 쏟아지고 있습니다. 그런데 그들이 하는 일의 대부분은 **공개된 표준 문서와
 반복 가능한 체크리스트**입니다. 사람이 하면 용역이지만, AI 에이전트가 하면 스킬입니다.
 
-이 저장소는 [Claude Code](https://claude.com/claude-code) 스킬입니다. 설치하면 당신의 에이전트가
-사이트를 진단하고, 고칠 것을 직접 고치고, 결과를 측정합니다.
+이 포크는 [leopard627의 원본 MIT 스킬](https://github.com/leopard627/fire-your-seo-agency)을
+**OmO/Senpi git 스킬 패키지**로 제공합니다. 원본 진단 절차·레퍼런스의 제작자는 leopard627이며,
+이 포크에서 패키지 매니페스트·한국어 우선 진입점·패키지 검증을 추가했습니다.
+[Claude Code](https://claude.com/claude-code)의 기존 설치 경로도 유지합니다.
 
 ## 만든 사람의 실측
 
@@ -50,10 +52,35 @@ frontmatter 콘텐츠 모델, 모든 글이 통과해야 하는 발행 게이트
 
 ## 설치
 
-플러그인으로 (권장 — 한 줄 설치, 업데이트 쉬움):
+### OmO / Senpi
+
+`~/.omo/agent/settings.json`의 기존 `packages` 배열에 아래 항목을 추가합니다.
+PR은 머지하지 않았으므로 현재는 브랜치를 지정합니다:
+
+```json
+"packages": ["git:github.com/Heoooooon/fire-your-seo-agency@omo-package"]
+```
+
+향후 머지되면 기본 브랜치 항목 `git:github.com/Heoooooon/fire-your-seo-agency`를 쓸 수 있습니다.
+새 세션 또는 `/reload` 후 반영됩니다. `pi.skills`는 `skills/fire-your-seo-agency`만 등록합니다.
+npm 의존성·설치 훅은 없으며, 패키지가 사용자 설정을 직접 바꾸지 않습니다.
+
+```text
+이 병원 홈페이지 SEO와 네이버 서치어드바이저·플레이스·AI 브리핑 노출을 진단해줘.
+이 앱 랜딩의 검색 노출과 ChatGPT 인용 가능성을 점검하고 llms.txt 개선안을 만들어줘.
+```
+
+[우리 사이트에 쓰는 법](./skills/fire-your-seo-agency/SKILL.md#우리-사이트에-쓰는-법)에
+치과·병원과 앱 랜딩의 일반 예제가 있습니다. 진단 요청은 읽기·보고까지만 하고,
+수정·외부 제출은 사용자가 요청·승인한 범위에 맞춥니다.
+
+### Claude Code (기존 설치)
+
+루트 `SKILL.md`, `references/`, `.claude-plugin/`은 그대로 유지합니다.
+이 포크를 플러그인으로 설치하려면:
 
 ```
-/plugin marketplace add leopard627/fire-your-seo-agency
+/plugin marketplace add Heoooooon/fire-your-seo-agency
 /plugin install fire-your-seo-agency@fire-your-seo-agency
 ```
 
@@ -61,10 +88,10 @@ frontmatter 콘텐츠 모델, 모든 글이 통과해야 하는 발행 게이트
 
 ```bash
 # 프로젝트 스킬로 (해당 프로젝트에서만)
-git clone https://github.com/leopard627/fire-your-seo-agency.git .claude/skills/fire-your-seo-agency
+git clone https://github.com/Heoooooon/fire-your-seo-agency.git .claude/skills/fire-your-seo-agency
 
 # 또는 개인 스킬로 (모든 프로젝트에서)
-git clone https://github.com/leopard627/fire-your-seo-agency.git ~/.claude/skills/fire-your-seo-agency
+git clone https://github.com/Heoooooon/fire-your-seo-agency.git ~/.claude/skills/fire-your-seo-agency
 ```
 
 그리고 Claude Code에서:
@@ -107,7 +134,11 @@ git clone https://github.com/leopard627/fire-your-seo-agency.git ~/.claude/skill
 ## 구조
 
 ```
-SKILL.md              ← 에이전트 운영 절차 (진단 → 구현 → 측정)
+package.json          ← OmO 패키지 매니페스트 (pi.skills)
+skills/fire-your-seo-agency/
+  SKILL.md            ← 한국어 우선 OmO/Senpi 진입점
+scripts/verify.mjs    ← 실제 Senpi 로더 검사 (설정 파일 쓰기 없음)
+SKILL.md              ← 기존 Claude 운영 절차 (진단 → 구현 → 측정)
 references/
   seo.md              ← 기술 SEO 체크리스트 + 실전 함정
   aeo.md              ← 답변엔진 최적화 (Bing 등록·AI Overviews·Copilot·E-E-A-T)
@@ -125,22 +156,30 @@ tests/                ← 검사별 단위 테스트
 
 > `references/`의 한국어 문서가 정본이고(에이전트가 읽는 것), `references/en/`은
 > 사람 독자를 위한 영문 미러입니다.
+> OmO 진입점은 자신의 디렉터리에서 `../../references/`로 공유 문서를 읽습니다.
+> 참조 문서를 옮기지 않아 기존 Claude clone 설치 경로도 유지됩니다.
 
 ## 저장소 검사
 
-이 저장소는 스스로를 검사합니다 — `.github/workflows/validate.yml`이 푸시·PR마다 아래를
-전부 돌립니다:
+이 저장소는 스스로를 검사합니다 — `.github/workflows/validate.yml`이 푸시·PR마다 Python
+검사를 돌립니다. Senpi 로더 검사는 로컬 설치가 필요하며 CI가 아닌 로컬에서 실행합니다:
 
 ```bash
-python3 tools/validate.py --strict          # 검사 10종, 표준 라이브러리만 사용
+python3 tools/validate.py --strict          # 검사 12종, 표준 라이브러리만 사용
 python3 -m unittest discover -s tests -t .  # 검사별 단위 테스트
 python3 -m pip install pillow
 python3 tools/optimize_assets.py --check    # 재압축 여지가 있는 자산 탐지
+node scripts/verify.mjs                    # 로컬 Senpi 설치 필요
 ```
+
+패키지 명령은 `npm test`, `npm run validate`, `npm run verify`이며 `bun run`으로도 실행할 수 있습니다.
+로더 검사는 기본적으로 `~/.bun/install/global/node_modules/@code-yeongyu/senpi`를 사용합니다.
+다른 경로에 설치했다면 `SENPI_ROOT`에 Senpi 설치 디렉터리를 지정합니다.
 
 `tools/validate.py`가 잡는 것은 문서 저장소에서 조용히 썩는 것들입니다: `SKILL.md`
 frontmatter 계약(케밥 표기 이름·64자 이름 한도·1024자 한 줄 설명), `plugin.json` ↔
-`marketplace.json` 버전·이름 일치, 매니페스트 버전과 `CHANGELOG.md` 일치, 상대 링크와
+`marketplace.json` 버전·이름 일치, OmO 스킬 frontmatter와 `package.json`의 등록·버전·라이선스
+일치, 매니페스트 버전과 `CHANGELOG.md` 일치, 상대 링크와
 앵커, 한/영 레퍼런스 구조 일치(제목 수·표 행·체크박스·절 번호), 자산 용량 예산과 프리뷰
 크기, MIT 라이선스 메타데이터, 모든 텍스트 파일의 시크릿 스캔.
 
@@ -156,4 +195,7 @@ frontmatter 계약(케밥 표기 이름·64자 이름 한도·1024자 한 줄 �
 
 ## 라이선스
 
-MIT — 마음껏 쓰고, 대행비는 아끼세요.
+MIT. 원본 스킬·진단 방법·레퍼런스 제작자는
+[leopard627](https://github.com/leopard627/fire-your-seo-agency)입니다.
+[LICENSE](./LICENSE)의 `Copyright (c) 2026 leopard627` 고지를 보존합니다.
+OmO/Senpi 패키징은 [이 포크](https://github.com/Heoooooon/fire-your-seo-agency)에서 관리합니다.

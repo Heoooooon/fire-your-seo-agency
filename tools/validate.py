@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Repository checks for the fire-your-seo-agency Claude Code plugin.
+"""Repository checks for the fire-your-seo-agency OmO and Claude Code package.
 
 Standard library only. Guards the parts of a documentation-only plugin repo that
 rot silently: the SKILL.md frontmatter contract, manifest and version
@@ -22,6 +22,8 @@ from pathlib import Path
 from urllib.parse import unquote
 
 SKILL_PATH = "SKILL.md"
+OMO_SKILL_PATH = "skills/fire-your-seo-agency/SKILL.md"
+PACKAGE_PATH = "package.json"
 PLUGIN_PATH = ".claude-plugin/plugin.json"
 MARKETPLACE_PATH = ".claude-plugin/marketplace.json"
 CHANGELOG_PATH = "CHANGELOG.md"
@@ -37,7 +39,7 @@ MAX_FILE_BYTES = 2_000_000
 SOCIAL_PREVIEW_DIMENSIONS = (1280, 640)
 
 SKIP_DIRS = frozenset({".git", "node_modules", "__pycache__", ".venv", ".idea", ".vscode"})
-TEXT_SUFFIXES = frozenset({".md", ".json", ".txt", ".yml", ".yaml", ".py", ".sh", ".toml", ".cfg", ".ini"})
+TEXT_SUFFIXES = frozenset({".md", ".json", ".txt", ".yml", ".yaml", ".py", ".sh", ".mjs", ".toml", ".cfg", ".ini"})
 REQUIRED_PLUGIN_KEYS = ("name", "description", "version", "license")
 REQUIRED_PLUGIN_ENTRY_KEYS = ("name", "description", "source", "version")
 KNOWN_FRONTMATTER_KEYS = frozenset({
@@ -51,7 +53,7 @@ KNOWN_FRONTMATTER_KEYS = frozenset({
     "model",
     "disable-model-invocation",
 })
-REPO_TOP_LEVEL = frozenset({"references", "assets", ".claude-plugin", "tools", "tests"})
+REPO_TOP_LEVEL = frozenset({"references", "skills", "scripts", "assets", ".claude-plugin", "tools", "tests"})
 README_LINK_RE = re.compile(r"\]\(\.?/?README(?:\.ko)?\.md\)")
 
 SKILL_NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -225,27 +227,29 @@ def read_text(path: Path):
         return None
 
 
-def check_skill(repo: Repo, report: Report):
-    if not repo.has(SKILL_PATH):
-        report.add("skill.frontmatter", False, "%s is missing" % SKILL_PATH)
+def check_skill(
+    repo: Repo, report: Report, path: str = SKILL_PATH, check: str = "skill.frontmatter",
+) -> str | None:
+    if not repo.has(path):
+        report.add(check, False, "%s is missing" % path)
         return None
-    text = read_text(repo.root / SKILL_PATH)
+    text = read_text(repo.root / path)
     if text is None:
-        report.add("skill.frontmatter", False, "%s is not valid UTF-8" % SKILL_PATH)
+        report.add(check, False, "%s is not valid UTF-8" % path)
         return None
     match = FRONTMATTER_RE.match(text)
     if not match:
-        report.add("skill.frontmatter", False, "%s must start with a --- delimited frontmatter block" % SKILL_PATH)
+        report.add(check, False, "%s must start with a --- delimited frontmatter block" % path)
         return None
     block = match.group(1)
     try:
         values = parse_frontmatter(block)
         parsed = strict_yaml(block)
     except ValueError as exc:
-        report.add("skill.frontmatter", False, "%s frontmatter: %s" % (SKILL_PATH, exc))
+        report.add(check, False, "%s frontmatter: %s" % (path, exc))
         return None
     if parsed is not None and not isinstance(parsed, dict):
-        report.add("skill.frontmatter", False, "%s frontmatter must parse as a YAML mapping" % SKILL_PATH)
+        report.add(check, False, "%s frontmatter must parse as a YAML mapping" % path)
         return None
     name = values.get("name", "")
     description = values.get("description", "")
@@ -263,14 +267,39 @@ def check_skill(repo: Repo, report: Report):
     if "\n" in description:
         problems.append("description must stay on a single line")
     if not text[match.end():].strip():
-        problems.append("%s has no body after the frontmatter" % SKILL_PATH)
+        problems.append("%s has no body after the frontmatter" % path)
     if problems:
-        report.add("skill.frontmatter", False, "; ".join(problems))
+        report.add(check, False, "; ".join(problems))
         return None
-    report.add("skill.frontmatter", True, "name=%s (%d chars), description=%d chars" % (name, len(name), len(description)))
+    report.add(check, True, "name=%s (%d chars), description=%d chars" % (name, len(name), len(description)))
     for key in sorted(set(values) - KNOWN_FRONTMATTER_KEYS):
-        report.add("skill.frontmatter.keys", False, "unexpected frontmatter key %r" % key, warn=True)
+        report.add(check + ".keys", False, "unexpected frontmatter key %r" % key, warn=True)
     return name
+
+
+def check_package_manifest(
+    repo: Repo, report: Report, skill_name: str | None, version: str | None,
+) -> None:
+    data = load_json_object(repo, PACKAGE_PATH, report, "manifest.package")
+    if data is None:
+        return
+    problems = []
+    if not non_empty_str(data.get("name")) or (skill_name and data["name"] != skill_name):
+        problems.append("package name must match the OmO skill name")
+    package_version = data.get("version")
+    if not non_empty_str(package_version) or not SEMVER_RE.match(package_version):
+        problems.append("package version must be semver")
+    elif version and package_version != version:
+        problems.append("package version must match plugin.json")
+    if data.get("license") != "MIT":
+        problems.append("package license must match the MIT license")
+    pi = data.get("pi")
+    if not isinstance(pi, dict) or pi.get("skills") != [str(Path(OMO_SKILL_PATH).parent)]:
+        problems.append("pi.skills must register skills/fire-your-seo-agency")
+    if problems:
+        report.add("manifest.package", False, "; ".join(problems))
+    else:
+        report.add("manifest.package", True, "OmO skill registered, version %s, MIT" % package_version)
 
 
 def check_plugin_manifest(repo: Repo, report: Report, skill_name):
@@ -660,8 +689,10 @@ def validate(root: Path) -> Report:
     repo = Repo(root)
     report = Report()
     skill_name = check_skill(repo, report)
+    omo_skill_name = check_skill(repo, report, OMO_SKILL_PATH, "skill.omo.frontmatter")
     plugin = check_plugin_manifest(repo, report, skill_name)
     check_marketplace_manifest(repo, report, plugin, skill_name)
+    check_package_manifest(repo, report, omo_skill_name, plugin.get("version") if plugin else None)
     check_references(repo, report)
     check_links(repo, report)
     check_readmes(repo, report)
