@@ -77,3 +77,16 @@ Allow: /
 
 - Perplexity·ChatGPT(검색 모드)에 실제 질문을 던져 출처 목록에 도메인이 뜨는지 확인
 - 안 뜨면: llms.txt 존재 → 크롤러 허용 → 해당 페이지 SSR 여부 → 경쟁 원출처 존재 순 점검
+
+## 5. 자동 점검 스크립트
+
+```bash
+python3 scripts/geo_check.py https://example-dental.co.kr/          # 사람이 읽는 표
+python3 scripts/geo_check.py https://example-dental.co.kr/ --json   # 보고서·비교용
+```
+
+- 자바스크립트 없이 받은 HTML 기준으로 SSR 본문 양, H1, 질문형 소제목, 인용 가능한 문단, JSON-LD의 Q&A·Dentist 엔티티·sameAs(네이버 플레이스·블로그·유튜브), 의료진(Person/Physician), 갱신일, naver-site-verification, OG 태그를 본다
+- robots.txt는 검색·인용 크롤러(Googlebot·Yeti·Bingbot·OAI-SearchBot·Claude-SearchBot·PerplexityBot·Applebot)와 학습 크롤러(GPTBot·ClaudeBot·Google-Extended 등)를 따로 판정한다. 학습만 막은 것은 실패가 아니다
+- llms.txt는 있는지만 알린다. 구글은 쓰지 않는다고 밝혔으므로 점수에 넣지 않는다
+- 점수는 가중치 없는 체크리스트 개수다. AI 답변에 실제로 인용되는지는 4번의 실제 질문으로 확인한다
+- 원본(claude-seo seo-geo)의 DataForSEO 연동은 유료라 뺐다

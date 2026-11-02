@@ -84,3 +84,16 @@ else's data loses the citation to the original.
   appears in the source list
 - Not appearing? Check in order: llms.txt exists → crawlers allowed → that page is SSR →
   a competing original source exists
+
+## 5. Automated check script
+
+```bash
+python3 scripts/geo_check.py https://example-dental.co.kr/          # human-readable table
+python3 scripts/geo_check.py https://example-dental.co.kr/ --json   # for reports and diffs
+```
+
+- From HTML fetched without JavaScript: SSR text volume, H1, question headings, quotable paragraphs, JSON-LD Q&A, the Dentist entity and its sameAs links (Naver Place/Blog, YouTube), doctors (Person/Physician), modified dates, naver-site-verification and OG tags
+- robots.txt is judged separately for search/citation crawlers (Googlebot, Yeti, Bingbot, OAI-SearchBot, Claude-SearchBot, PerplexityBot, Applebot) and training crawlers (GPTBot, ClaudeBot, Google-Extended, ...). Blocking training only is not a failure
+- llms.txt is only reported as present or missing; Google says it does not use it, so it carries no score
+- The score is an unweighted checklist count. Whether AI answers actually cite the page is checked with real questions as in section 4
+- The DataForSEO integration from claude-seo's seo-geo is paid and was dropped

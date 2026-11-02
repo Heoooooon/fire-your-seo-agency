@@ -114,6 +114,17 @@ Phase 0의 콘텐츠 진단(인벤토리) → 이 Phase로 직행한다. 글 한
 ("월 N건 발행"이 아니라 "노출·인용된 글의 비율"이 지표다). **"고쳤다"로 끝나는 보고는 실패다** —
 "언제 무엇을 다시 재는지"까지가 완료 조건이다.
 
+## 점검 도구 (스크립트)
+
+표준 라이브러리 Python 스크립트로 크롤러의 눈 점검을 반복 가능하게 남긴다. 출처는 claude-seo(MIT, `NOTICE`).
+
+- **배포 전후 변경 감지**: `scripts/seo_drift.py baseline|compare|history <url>` — 배포 직전 baseline, 직후 compare.
+  CRITICAL(noindex·canonical·JSON-LD 삭제·네이버 소유 확인 메타 삭제 등)이면 종료 코드 3. `references/drift.md`
+- **구조화 데이터 검사**: `scripts/schema_check.py <url|파일>` — Dentist/LocalBusiness 필수 속성, FAQPage Q&A,
+  자리표시자·폐지 타입. 플러그인 설치 시 `hooks/hooks.json`이 Edit·Write 직후 자동 검사. `references/schema.md`
+- **GEO 점검**: `scripts/geo_check.py <url>` — 검색·학습 크롤러 허용을 따로 판정, SSR 본문·질문형 소제목·엔티티·
+  갱신일·네이버 신호. `references/geo.md` 5번
+
 ## 보고 형식
 
 작업 후 보고는 항상: ① 바꾼 것 (before/after) ② 크롤러 눈 검증 결과 (curl 증빙)

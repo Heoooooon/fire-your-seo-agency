@@ -95,6 +95,17 @@ frontmatter에서 화면과 JSON-LD를 함께 생성한다.
 보고에는 ① 변경 전후 ② URL·HTTP·HTML 검증 증거 ③ 다음 측정 일정
 ④ 확인하지 못한 항목과 이유를 포함한다. 장기 인용 성과를 즉시 검증한 것처럼 말하지 않는다.
 
+## 7. 점검 스크립트
+
+패키지 루트(이 디렉터리 기준 `../../`)의 표준 라이브러리 Python 스크립트를 실행한다. 출처는 claude-seo(MIT, 루트 NOTICE).
+
+- **배포 전후 변경 감지:** `python3 ../../scripts/seo_drift.py baseline <url>` → 배포 → `compare <url>`.
+  CRITICAL이면 종료 코드 3. 규칙은 [drift](../../references/drift.md).
+- **구조화 데이터:** `python3 ../../scripts/schema_check.py <url|파일>`. 치과 Dentist·FAQPage 필수 속성과
+  자리표시자를 본다. 기준은 [schema](../../references/schema.md). OmO에는 저장 훅이 없으니 JSON-LD를 고친 뒤 직접 실행한다.
+- **GEO:** `python3 ../../scripts/geo_check.py <url>`. 검색·학습 크롤러를 구분하고 네이버 Yeti·소유 확인 메타도 본다.
+  해석은 [GEO 5번](../../references/geo.md#5-자동-점검-스크립트).
+
 ## 우리 사이트에 쓰는 법
 
 - **치과·병원 홈페이지:** "이 병원 홈페이지 SEO와 네이버 서치어드바이저·플레이스·AI 브리핑
@@ -104,5 +115,7 @@ frontmatter에서 화면과 JSON-LD를 함께 생성한다.
 - **앱 랜딩 페이지:** "이 앱 랜딩의 검색 노출과 ChatGPT 인용 가능성을 점검하고,
   llms.txt와 FAQ 개선안을 만들어줘." 실제 기능·가격·지원 플랫폼·스토어 링크를 기준으로
   질문별 직답·canonical·사이트맵·JSON-LD를 확인한다. 출시하지 않은 기능을 설명하지 않는다.
+- **배포 전후 확인:** "리뉴얼 배포 전에 홈 기준선 잡고, 배포 후 바뀐 SEO 요소를 알려줘." 배포 전
+  `seo_drift.py baseline`, 배포 후 `compare`를 같은 URL로 돌리고 CRITICAL은 되돌림 또는 즉시 수정을 제안한다.
 - **수정까지 요청할 때:** "위 진단의 우선순위대로 로컬 코드를 고치고, 크롤러 응답 검증과
   14일 후 측정 계획을 남겨줘." 승인된 수정 범위만 구현하고 외부 등록·게시·배포는 분리한다.

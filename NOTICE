@@ -1,0 +1,47 @@
+fire-your-seo-agency
+Copyright (c) 2026 leopard627 (see LICENSE)
+
+This repository includes code and documentation adapted from:
+
+claude-seo — https://github.com/AgriciDaniel/claude-seo
+Copyright (c) 2026 AgriciDaniel
+Licensed under the MIT License (text below).
+Source commit: 6be93f4 (shallow clone, 2026-11-02)
+
+Adapted files:
+- scripts/seo_page.py       <- scripts/fetch_page.py, scripts/parse_html.py, scripts/url_safety.py
+- scripts/seo_drift.py      <- scripts/drift_baseline.py, scripts/drift_compare.py, scripts/drift_history.py,
+                               skills/seo-drift/ (comparison rules)
+- scripts/schema_check.py   <- hooks/validate-schema.py, skills/seo-schema/
+- hooks/validate-schema.py  <- hooks/validate-schema.py
+- hooks/hooks.json          <- hooks/hooks.json
+- scripts/geo_check.py      <- skills/seo-geo/ (analysis criteria, AI crawler table)
+- references/drift.md, references/schema.md, references/geo.md section 5 (+ English mirrors)
+
+Changes: rewritten for the Python standard library, Core Web Vitals and DataForSEO
+(paid/API-key) features removed, Korean dental and Naver (Search Advisor, Yeti,
+naver-site-verification) checks and examples added.
+
+---
+
+MIT License
+
+Copyright (c) 2026 agricidaniel
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

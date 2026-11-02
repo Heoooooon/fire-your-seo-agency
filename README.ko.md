@@ -147,10 +147,15 @@ references/
   neo-naver.md        ← 네이버 (서치어드바이저·AI 브리핑·블로그 투트랙)
   content.md          ← 콘텐츠 운영 (서브 블로그·콘텐츠 모델·백로그·발행 게이트·갱신)
   measure.md          ← 측정 루프 (고치고 끝이 아니다)
+  drift.md            ← 배포 전후 SEO 변경 감지 (기준선·비교 규칙)
+  schema.md           ← 구조화 데이터 검사 (치과 Dentist·FAQPage 기준)
   en/                 ← 전체 레퍼런스 영문 미러 (사람 독자용)
 .claude-plugin/       ← 플러그인·마켓플레이스 매니페스트 (/plugin 설치 지원)
 tools/                ← 저장소 검사(validate.py) + 무손실 자산 재압축
 tests/                ← 검사별 단위 테스트
+scripts/              ← 점검 스크립트(seo_drift·schema_check·geo_check) + Senpi 로더 검사
+hooks/                ← Claude Code 저장 시 JSON-LD 검사 훅
+NOTICE                ← claude-seo(MIT) 출처·라이선스
 .github/workflows/    ← 푸시·PR마다 검사·테스트·자산 검사를 도는 CI
 ```
 
