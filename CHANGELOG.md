@@ -7,6 +7,13 @@ Notable changes per release. Versions match the plugin tags
 
 ## Unreleased
 
+- Ported from claude-seo (MIT, AgriciDaniel; see `NOTICE`): `scripts/seo_drift.py`
+  (baseline/compare/history drift monitor, 16 rules incl. Naver site-verification removal),
+  `scripts/schema_check.py` + `hooks/validate-schema.py` (JSON-LD check with clinic/FAQ rules and
+  Korean placeholders; Claude Code PostToolUse hook), `scripts/geo_check.py` (search vs training
+  crawler access incl. Naver Yeti, SSR/entity/freshness checks). Standard library only; Core Web
+  Vitals and DataForSEO features dropped. New `references/drift.md`, `references/schema.md`,
+  `references/geo.md` §5 with English mirrors.
 - OmO/Senpi git package manifest with `pi.skills`, Korean-first skill entry point,
   clinic/app usage examples and a real Senpi loader check.
 - Package/frontmatter validation and regression tests alongside the existing

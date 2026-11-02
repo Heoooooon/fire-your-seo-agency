@@ -154,10 +154,15 @@ references/
   neo-naver.md        ← Naver (Search Advisor · AI Briefing · blog two-track)
   content.md          ← content ops (sub-blog · content model · backlog · publish gate · refresh)
   measure.md          ← the measurement loop (fixing it is not the finish line)
+  drift.md            ← SEO change detection before/after a deploy (baseline · rules)
+  schema.md           ← structured data check (clinic Dentist · FAQPage)
   en/                 ← English mirrors of all reference docs (for human readers)
 .claude-plugin/       ← plugin & marketplace manifests (/plugin install support)
 tools/                ← repository checks (validate.py) + lossless asset optimizer
 tests/                ← unit tests for the checks
+scripts/              ← check scripts (seo_drift · schema_check · geo_check) + Senpi loader check
+hooks/                ← Claude Code JSON-LD check on save
+NOTICE                ← claude-seo (MIT) attribution and license
 .github/workflows/    ← CI: checks, tests and the asset check on every push/PR
 ```
 
